@@ -4,10 +4,11 @@ const jwt = require('jsonwebtoken')
 
 const secrectKey = "c5d5c67a779217b1a883ba15557acc435f0d7f9c80982b95f53584cc87413888"
 const register = async (req, res) => {
+    console.log(req.body)
 
     try {
+        //ปัญหาเกิดที่ Email
         const user = await User.findOne({ where: { email: req.body.email } })
-        console.log(user)
 
         if (user) {
             res.json({ message: 'email has alredy exit' })
@@ -16,10 +17,11 @@ const register = async (req, res) => {
 
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
             await User.create({
-                username: req.body.name,
+                username: req.body.username,
                 password: hashedPassword,
-                email: req.body.email,
-                tel: req.body.tel || null
+                email: req.body.email|| null,
+                tel: req.body.tel || null , 
+                role:req.body.role
             });
             res.status(201).json({ message: 'register success' })
         }

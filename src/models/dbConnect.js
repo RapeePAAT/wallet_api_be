@@ -5,5 +5,6 @@ const sequelize = new Sequelize ('test9', 'postgres', '63043623', {
     dialect: 'postgres'
 })
 
+
 module.exports = sequelize
 

@@ -12,6 +12,7 @@ const User = sequelize.define('User', {
   username: {
     type: DataTypes.STRING(60),
     allowNull: false,
+    require:true ,
   },
   password: {
     type: DataTypes.STRING(60),
@@ -20,12 +21,19 @@ const User = sequelize.define('User', {
   },
   email: {
     type: DataTypes.STRING(60),
-    allowNull: false
+    allowNull: true , 
+    require:false 
   },
   tel: {
     type: DataTypes.STRING(10),
-    allowNull: true
+    allowNull: true,
+    require:false ,
   },
+  role :{
+    type :DataTypes.ENUM("user" ,"admin") ,
+    defaultValue:'user',
+    require:false 
+  } , 
   create_at: {
     type: DataTypes.DATE,
     defaultValue: Sequelize.NOW
@@ -52,18 +60,18 @@ const Cryptocurrency = sequelize.define("Cryptocurrency", {
   name: {
     type: DataTypes.STRING(60),
     allowNull: false,
+    unique: true , 
   },
   symbol: {
     type: DataTypes.STRING(60),
     allowNull: false,
+    unique:true ,
   },
   create_at: {
     type: DataTypes.DATE,
     defaultValue: Sequelize.NOW
   },
-  delete_at: {
-    type: DataTypes.DATE
-  }
+  
 }, {
   tableName: 'cryptocurrency',
   timestamps: false
@@ -99,21 +107,16 @@ const Wallet = sequelize.define('Wallet', {
   timestamps: false
 });
 
-const Exchange = sequelize.define('Exchange', {
+const DigitalAsset = sequelize.define('digitalasset', {
   id: {
     primaryKey: true,
     autoIncrement: true,
     allowNull: false,
     type: DataTypes.INTEGER,
   },
-  from_cryptocurrency_id: { type: DataTypes.INTEGER, allowNull: false },
-  to_cryptocurrency_id: { type: DataTypes.INTEGER, allowNull: false },
-  min_rate: {
-    type: DataTypes.INTEGER,
-    defaultValue: 1,
-    allowNull: false
-  },
-  rate: {
+  user_id :{type:DataTypes.INTEGER , allowNull:false} ,
+  cryptocurrency_id: { type: DataTypes.INTEGER, allowNull: false  , unique:true},
+  balance: {
     type: DataTypes.DECIMAL,
     allowNull: false
   },
@@ -125,36 +128,66 @@ const Exchange = sequelize.define('Exchange', {
     type: DataTypes.DATE
   }
 }, {
-  tableName: 'exchange',
+  tableName: 'digitalasset',
   timestamps: false
 });
 
-const Transaction = sequelize.define('Transaction', {
+const ExchangeRate  = sequelize.define('exchangerate',{
   id: {
     primaryKey: true,
     autoIncrement: true,
     allowNull: false,
     type: DataTypes.INTEGER,
   },
-  from_user_id: { type: DataTypes.INTEGER, allowNull: false },
-  to_user_id: { type: DataTypes.INTEGER, allowNull: false },
-  from_cryptocurrency_id: { type: DataTypes.INTEGER, allowNull: false },
-  to_cryptocurrency_id: { type: DataTypes.INTEGER, allowNull: false },
-  rate: {
-    type: DataTypes.DECIMAL,
+  from_cryptocurrency_id :{
+    type:DataTypes.INTEGER , 
+    allowNull:false , 
   },
-  amount: {
-    type: DataTypes.DECIMAL(),
-    allowNull: false
+  to_cryptocurrency_id :{
+    type: DataTypes.INTEGER , 
+    allowNull:false
   },
-  create_at: {
-    type: DataTypes.DATE,
-    defaultValue: Sequelize.NOW
+  rate:{
+    type: DataTypes.DECIMAL , 
+    allowNull:false,
+  },
+  create_at:{
+    type:DataTypes.DATE , 
+    defaultValue:Sequelize.NOW
+  },
+  update_at:{
+    type:DataTypes.DATE
   }
-}, {
-  tableName: 'transaction',
-  timestamps: false
-});
+  
+  
+}, {timestamps:false  , tableName:"exchangerate"})
+
+// const Transaction = sequelize.define('Transaction', {
+//   id: {
+//     primaryKey: true,
+//     autoIncrement: true,
+//     allowNull: false,
+//     type: DataTypes.INTEGER,
+//   },
+//   from_user_id: { type: DataTypes.INTEGER, allowNull: false },
+//   to_user_id: { type: DataTypes.INTEGER, allowNull: false },
+//   from_cryptocurrency_id: { type: DataTypes.INTEGER, allowNull: false },
+//   to_cryptocurrency_id: { type: DataTypes.INTEGER, allowNull: false },
+//   rate: {
+//     type: DataTypes.DECIMAL,
+//   },
+//   amount: {
+//     type: DataTypes.DECIMAL(),
+//     allowNull: false
+//   },
+//   create_at: {
+//     type: DataTypes.DATE,
+//     defaultValue: Sequelize.NOW
+//   }
+// }, {
+//   tableName: 'transaction',
+//   timestamps: false
+// });
 
 //Associations
 User.hasMany(Wallet, { foreignKey: "user_id", onDelete: 'CASCADE' });
@@ -167,30 +200,62 @@ Cryptocurrency.hasMany(Wallet, { foreignKey: "cryptocurrency_id" });
 Wallet.belongsTo(Cryptocurrency, { foreignKey: "cryptocurrency_id" });
 
 
-User.hasMany(Exchange, { foreignKey: "user_id" });
-Exchange.belongsTo(User, { foreignKey: "user_id" });
+// asset key
+User.hasMany(DigitalAsset , {foreignKey:"user_id"})
+DigitalAsset.belongsTo(User ,{foreignKey:"user_id"})
 
-Cryptocurrency.hasMany(Exchange, { foreignKey: "from_cryptocurrency_id" });
-Cryptocurrency.hasMany(Exchange, { foreignKey: "to_cryptocurrency_id" });
-Exchange.belongsTo(Cryptocurrency, { foreignKey: "from_cryptocurrency_id" });
-Exchange.belongsTo(Cryptocurrency, { foreignKey: "to_cryptocurrency_id" });
+Cryptocurrency.hasMany(DigitalAsset , {foreignKey:"cryptocurrency_id" , onDelete:"CASCADE"})
+DigitalAsset.belongsTo(Cryptocurrency ,{foreignKey:"cryptocurrency_id"})
 
-User.hasMany(Transaction, { foreignKey: "from_user_id", onDelete: 'CASCADE' });
-User.hasMany(Transaction, { foreignKey: "to_user_id", onDelete: 'CASCADE' });
-Cryptocurrency.hasMany(Transaction, { foreignKey: "from_cryptocurrency_id" });
-Cryptocurrency.hasMany(Transaction, { foreignKey: "to_cryptocurrency_id" });
-Transaction.belongsTo(Cryptocurrency, { foreignKey: "from_cryptocurrency_id" });
-Transaction.belongsTo(Cryptocurrency, { foreignKey: "to_cryptocurrency_id" });
-Transaction.belongsTo(User, { foreignKey: "from_user_id" });
-Transaction.belongsTo(User, { foreignKey: "to_user_id" });
+//exhchangerate
+User.hasMany(ExchangeRate , {foreignKey:'user_id'})
+ExchangeRate.belongsTo(User , {foreignKey:"user_id"})
+
+Cryptocurrency.hasMany(ExchangeRate , {foreignKey:"from_cryptocurrency_id" , onDelete:"CASCADE"})
+ExchangeRate.belongsTo(Cryptocurrency , {foreignKey:"from_cryptocurrency_id"})
+
+Cryptocurrency.hasMany(ExchangeRate , {foreignKey:"to_cryptocurrency_id" , onDelete:"CASCADE"})
+ExchangeRate.belongsTo(Cryptocurrency , {foreignKey:"to_cryptocurrency_id"})
+
+
+
+//transaction
+
+// User.hasMany(Exchange, { foreignKey: "user_id" });
+// Exchange.belongsTo(User, { foreignKey: "user_id" });
+
+// Cryptocurrency.hasMany(Exchange, { foreignKey: "from_cryptocurrency_id" });
+// Cryptocurrency.hasMany(Exchange, { foreignKey: "to_cryptocurrency_id" });
+// Exchange.belongsTo(Cryptocurrency, { foreignKey: "from_cryptocurrency_id" });
+// Exchange.belongsTo(Cryptocurrency, { foreignKey: "to_cryptocurrency_id" });
+
+
+//transaction key
+// User.hasMany(Transaction, { foreignKey: "from_user_id", onDelete: 'CASCADE' });
+// User.hasMany(Transaction, { foreignKey: "to_user_id", onDelete: 'CASCADE' });
+// Cryptocurrency.hasMany(Transaction, { foreignKey: "from_cryptocurrency_id" });
+// Cryptocurrency.hasMany(Transaction, { foreignKey: "to_cryptocurrency_id" });
+// Transaction.belongsTo(Cryptocurrency, { foreignKey: "from_cryptocurrency_id" });
+// Transaction.belongsTo(Cryptocurrency, { foreignKey: "to_cryptocurrency_id" });
+// Transaction.belongsTo(User, { foreignKey: "from_user_id" });
+// Transaction.belongsTo(User, { foreignKey: "to_user_id" });
 
 const Migrate = async () => {
+  
+  try {
+    await sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
   await User.sync();
   await Cryptocurrency.sync();
   await Wallet.sync();
-  
-  await Exchange.sync();
-  await Transaction.sync();
+  await DigitalAsset.sync();
+  await ExchangeRate.sync();
+
+
+  //await Transaction.sync();
 };
 
-module.exports = { User, Wallet, Cryptocurrency,Exchange, Transaction,Migrate };
+module.exports = { User, Wallet, Cryptocurrency, DigitalAsset , ExchangeRate, Migrate };

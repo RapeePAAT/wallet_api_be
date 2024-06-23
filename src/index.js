@@ -19,6 +19,7 @@ app.get('/',(req,res)=>{
 })
 
 
-app.listen(port , ()=>{
+app.listen(port ,()=>{
+    Migrate()
     console.log("server is running on : http://localhost:3001/")
 })
