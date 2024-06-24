@@ -40,7 +40,6 @@ const login = async (req, res) => {
             return res.status(401).json({ status: false, message: "Username or password worng" })
 
         }
-                    console.log(user)
 
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
