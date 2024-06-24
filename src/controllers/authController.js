@@ -46,7 +46,6 @@ const login = async (req, res) => {
             return res.status(401).json({ status: false, message: "Wrong Password" })
         }
 
-        console.log(secrectKey)
         const accessToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: '1h' })
         const refreshToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: '1day'})
         res.status(200).json({ accessToken: accessToken, refreshToken: refreshToken })
