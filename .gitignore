@@ -1,2 +1,3 @@
 node_modules
 pacpackage-lock.json
+.env

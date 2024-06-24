@@ -46,8 +46,8 @@ const login = async (req, res) => {
             return res.status(401).json({ status: false, message: "Wrong Password" })
         }
 
-        const accessToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: '1h' })
-        const refreshToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: '7day' })
+        const accessToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: process.env.ACCESS_TOKEN_EXPIRESIN })
+        const refreshToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: process.env.REFRESH_TOKEN_EXPIRESIN })
         res.status(200).json({ accessToken: accessToken, refreshToken: refreshToken })
 
     }catch(e){

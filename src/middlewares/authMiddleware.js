@@ -1,8 +1,10 @@
 
 const jwt = require('jsonwebtoken')
 
-const secrectKey = "c5d5c67a779217b1a883ba15557acc435f0d7f9c80982b95f53584cc87413888"
+const secrectKey = process.env.SECREATE_KEY
 const {User} = require('../models/model')
+
+
 const authenicationToken = (req,res,next)=>{
 const authHeader  = req.headers['authorization'];
 const token = authHeader && authHeader.split(' ')[1];
@@ -36,21 +38,5 @@ const onlyAdiminMiddleWare = async (req,res , next)=>{
 } 
 
 
-// เเอดมินเเละ user สามารถเข้าใช้งานได้
-// const adminAndUserMiddleWare = async (req,res , next) =>{
-//     const user = await User.findByPk(req.user.user_id);
-//     if(user == null){
-//         return res.status(404).json({mesage:'user not found'})
-//     }else{
-
-//         if(user.role === "user"){
-//             next()
-//         }
-//         else{
-//             return res.status(403).json({message:'no permision'})
-//         }
-//     }
-
-// }
 
 module.exports = {authenicationToken , onlyAdiminMiddleWare }

@@ -1,7 +1,7 @@
 const {Router} = require('express')
 const router = Router()
 
-router.use('/auth' , require('./auth/auth'))
+router.use('/auth' , require('./auth'))
 router.use('/user', require('./user'))
 router.use('/cryptocurrency' , require('./cryptocurrency'))
 router.use('/wallet' , require('./wallet'))

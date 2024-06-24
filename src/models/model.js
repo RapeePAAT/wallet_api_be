@@ -270,12 +270,12 @@ const Migrate = async () => {
   } catch (error) {
     console.error('Unable to connect to the database:', error);
   }
-  await User.sync({force:true});
-  await Cryptocurrency.sync({force:true});
-  await Wallet.sync({force:true});
-  await DigitalAsset.sync({force:true});
-  await ExchangeRate.sync({force:true});
-  await Transaction.sync({force:true});
+  await User.sync();
+  await Cryptocurrency.sync();
+  await Wallet.sync();
+  await DigitalAsset.sync();
+  await ExchangeRate.sync();
+  await Transaction.sync();
 };
 
 module.exports = { User, Wallet, Cryptocurrency, DigitalAsset, ExchangeRate, Transaction,  Migrate };
