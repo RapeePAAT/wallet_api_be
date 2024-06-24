@@ -6,7 +6,7 @@ const swaggerUi = require('swagger-ui-express');
 const router = require('./routes');
 const { Migrate } = require('./models/model');
 const app = express();
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 3001;
 require('dotenv').config()
 
 // Swagger options
@@ -35,7 +35,7 @@ const options = {
     },
     apis: ['./src/routes/*.js'], // Adjust path to match your API endpoint files
 };
-
+app.use(cors())
 const swaggerSpec = swaggerJSDoc(options);
 
 app.use(bodyParser.json());

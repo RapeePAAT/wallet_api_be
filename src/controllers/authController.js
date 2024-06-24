@@ -1,9 +1,8 @@
 const { User } = require('../models/model')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-require('dotenv').config()
 
-const secrectKey = process.env.SECREATE_KEY
+const secrectKey = "c5d5c67a779217b1a883ba15557acc435f0d7f9c80982b95f53584cc87413888"
 const register = async (req, res) => {
 
     try {
@@ -41,13 +40,16 @@ const login = async (req, res) => {
             return res.status(401).json({ status: false, message: "Username or password worng" })
 
         }
+                    console.log(user)
+
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
             return res.status(401).json({ status: false, message: "Wrong Password" })
         }
 
-        const accessToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: process.env.ACCESS_TOKEN_EXPIRESIN })
-        const refreshToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: process.env.REFRESH_TOKEN_EXPIRESIN })
+        console.log(secrectKey)
+        const accessToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: '1h' })
+        const refreshToken = jwt.sign({ user_id: user.id }, secrectKey, { expiresIn: '1day'})
         res.status(200).json({ accessToken: accessToken, refreshToken: refreshToken })
 
     }catch(e){
