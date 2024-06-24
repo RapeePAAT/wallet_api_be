@@ -46,7 +46,7 @@ const creatCryptocurrency = async (req,res)=>{
         const data =  await Cryptocurrency.create({
             user_id :req.user.user_id,
             name:req.body.name ,
-            symbol:req.body.name ,
+            symbol:req.body.symbol ,
         })
         if (data !== null){
             res.json({status:true  ,message: "create success"})
