@@ -1,5 +1,5 @@
 
-const { User , Cryptocurrency , Wallet } = require('../models/model');
+const { User , Cryptocurrency , Wallet, DigitalAsset } = require('../models/model');
 
 const getAllWallet = async (req, res)=>{
     try {
@@ -70,15 +70,26 @@ const getAllWalletByUserId =async (req,res)=>{
 } 
 
 const createWallet = async(req,res)=>{
-
-
     try{
         const {cryptocurrency_id , amount} = req.body
-        const crypto = await Cryptocurrency.findByPk(cryptocurrency_id)
+        const [crypto , digitalData] = await Promise.all([
+            Cryptocurrency.findByPk(cryptocurrency_id),
+            DigitalAsset.findOne({where:{cryptocurrency_id:cryptocurrency_id}})
+        ])
         if(!crypto){
             return res.status(404).json({status: false  , message: 'Cryptocurrency not found'})
 
-        }else{
+        }
+        if(!digitalData){
+            return res.status(404).json({status:false , message:"Digital Assets not found"})
+        }
+        if(digitalData.balance <amount){
+            return res.status(400).json({status:false , message:"Sry my digital not have to tranfer"})
+        }
+        digitalData.balance-= amount ; 
+
+        const digtaldataSuccess = await digitalData.save() 
+        if(digtaldataSuccess){
             Wallet.create({
                 user_id:req.user.user_id, 
                 cryptocurrency_id:cryptocurrency_id,
@@ -86,9 +97,15 @@ const createWallet = async(req,res)=>{
             })
             return res.status(201).json({staus:true , message:"create Success"})
         }
+        else{
+            return res.status(400).json({staus:false , message :"can't tranger with digital balanve"})
+        }
+            
+        
 
-
-    }catch(e){
+    
+    }
+    catch(e){
         return   res.status(500).json({staus:false  , message :"something wrong" , details :e.message})
 
     }
@@ -96,19 +113,33 @@ const createWallet = async(req,res)=>{
 }
 const updateWalletByid = async(req ,res)=>{
     try{
-         const  wallet = await Wallet.findByPk(req.params.id) ; 
+        ; 
+         const [wallet , digitalData] = await Promise.all([
+            Wallet.findByPk(req.params.id),
+            DigitalAsset.findOne({where:{cryptocurrency_id:req.body.cryptocurrency_id}})
+        ])
          if(!wallet){
             return res.status(404).json({status: false  , message: 'items not found'})
          }
-         else{
-            Wallet.update({
-                amount: req.body.amount  , 
-                update_at : new Date()
-            },{
-                where:{id:req.params.id}
-            })
-            return res.status(200).json({status:true , message :"update succes"})
+         if(!digitalData){
+            return res.status(404).json({status:false  , mesasge:"Dital Wallet at my server not found"})
          }
+         digitalData.balance-=req.body.amount
+         wallet.amount+=req.body.amount
+
+         const [digitalSuccess , walletSucess ] = await Promise.all([
+             digitalData.save(),
+             wallet.save()
+         ])
+        
+        if(!digitalSuccess){
+            return res.status(400).json({status:false  , message:"can't tranfer balance "})
+        }
+        if(!walletSucess){
+            return res.status(400).json({status:false  , message:"can't tranfer wallet "})
+        }   
+        return res.status(200).json({status:true , message :"update succes"})
+         
     }catch(e){
         return   res.status(500).json({staus:false  , message :"something wrong" , details :e.message})
     }

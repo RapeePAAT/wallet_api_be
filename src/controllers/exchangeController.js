@@ -5,7 +5,12 @@ const  {User , Cryptocurrency , ExchangeRate} = require('../models/model')
 const getAllExchangeRate = async (req,res)=>{
 
     try {
-        const exchange = await ExchangeRate.findAll();
+        const exchange = await ExchangeRate.findAll({
+           include:[
+            {model:Cryptocurrency , as:"FromCryptoRateId"},
+            {model:Cryptocurrency , as:"ToCryptoRateId"},
+           ]
+        });
         if(!ExchangeRate){
             return res.status(404).json({status:false , message:"Empty Data"})
         }
@@ -21,7 +26,11 @@ const getAllExchangeRate = async (req,res)=>{
 }
 const getExchangeRateById = async (req, res) => {
     try {
-        const exchange = await ExchangeRate.findByPk(req.params.id, {
+        const exchange = await ExchangeRate.findByPk(req.params.id,{
+            include:[
+                {model:Cryptocurrency , as:"FromCryptoRateId"},
+                {model:Cryptocurrency , as:"ToCryptoRateId"},
+            ]
         });
 
         if (!exchange) {
@@ -36,11 +45,22 @@ const getExchangeRateById = async (req, res) => {
 }
 const createExchangeRate = async (req,res)=>{
     try{
+        const { from_cryptocurrency_id, to_cryptocurrency_id, rate } = req.body;
+    
+        const fromCryptoExists = await Cryptocurrency.findByPk(from_cryptocurrency_id);
+        const toCryptoExists = await Cryptocurrency.findByPk(to_cryptocurrency_id);
+
+        if (!fromCryptoExists || !toCryptoExists) {
+            return res.status(400).json({
+                status: false,
+                message: "Invalid cryptocurrency IDs"
+            });
+        }
         const exchange = await ExchangeRate.create({
             user_id : req.user.user_id , 
-            from_cryptocurrency_id:req.body.from_cryptocurrency_id , 
-            to_cryptocurrency_id:req.body.to_cryptocurrency_id,
-            rate:req.body.rate 
+            from_cryptocurrency_id, 
+            to_cryptocurrency_id,
+            rate
         })
         if(!exchange){
             return res.status(400).json({status:false , message:"can't create"})
