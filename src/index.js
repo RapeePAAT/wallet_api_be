@@ -55,5 +55,5 @@ app.use('/api/v1',router ); // Ensure the correct path for the router
 
 app.listen(port, () => {
     Migrate()
-    console.log(`Server is running on: http://localhost:${port}/`);
+    console.log(`Server is running on: http://localhost:${port}/api-docs`);
 });

@@ -7,7 +7,7 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_
     dialect:process.env.DATABASE_TYPE ,
     port:process.env.DATABASE_PORT,
     operatorAlias:false,
-
+    logging:false
   });
 
 
