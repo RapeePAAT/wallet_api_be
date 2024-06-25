@@ -36,8 +36,7 @@ const getWalletById = async (req ,res)=>{
 //user 
 const getAllWalletByUser =async (req,res)=>{
     try{
-        console.log(req.user)
-        const wallet = await Wallet.findAll({include:[{model:User},{model:Cryptocurrency}]})
+        const wallet = await Wallet.findAll({include:[{model:User},{model:Cryptocurrency}] ,where:{user_id:req.user.user_id}})
         if(!wallet){
             return res.status(404).json({status: false  , message: 'items not found'})
 

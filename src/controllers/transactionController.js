@@ -63,7 +63,6 @@ const createTransaction = async (req, res) => {
             Wallet.findOne({ where: { user_id: req.user.user_id, cryptocurrency_id: from_cryptocurrency_id } }),
             Wallet.findOne({ where: { user_id: to_user_id, cryptocurrency_id: to_cryptocurrency_id } })
         ]);
-
         if (!ToUser) {
             return res.status(404).json({ status: false, message: "To User not found" });
         }
@@ -76,18 +75,20 @@ const createTransaction = async (req, res) => {
         if (!fromWallet) {
             return res.status(400).json({ status: false, message: "from wallet not found just go creaet" })
         }
-        if (!toWallet) {
-            toWallet = await Wallet.create({
-                user_id: to_user_id,
-                cryptocurrency_id: to_cryptocurrency_id,
-                amount: 0
-            })
-            if (!toWallet) {
-                return res.status(400).json({ status: false, message: "Sry we can't tranfer wallet " })
-            }
-        }
+
 
         if (FromCryptoId.id === ToCryptoId.id) {
+            if (!toWallet) {
+    
+                toWallet = await Wallet.create({
+                    user_id: to_user_id,
+                    cryptocurrency_id: to_cryptocurrency_id,
+                    amount: 0
+                })
+                if (!toWallet) {
+                    return res.status(400).json({ status: false, message: "Sry we can't tranfer wallet " })
+                }
+            }
             if (!fromWallet) {
                 return res.status(400).json({ status: false, message: "From wallet not found" });
             }
@@ -125,11 +126,23 @@ const createTransaction = async (req, res) => {
             }
         } else {
             // exchange rate 
+            if (!toWallet) {
+                console.log(toWallet)
+    
+                toWallet = await Wallet.create({
+                    user_id: to_user_id,
+                    cryptocurrency_id: to_cryptocurrency_id,
+                    amount: 0
+                })
+                if (!toWallet) {
+                    return res.status(400).json({ status: false, message: "Sry we can't tranfer wallet " })
+                }
+            }
 
             if (!fromWallet) {
                 return res.status(400).json({ status: false, message: "From wallet not found" });
             }
-
+            
 
             if (fromWallet.amount < amount) {
                 return res.status(400).json({ status: false, meesage: "Insufficient funds" })
@@ -172,24 +185,7 @@ const createTransaction = async (req, res) => {
         return res.status(500).json({ status: false, message: "Something went wrong", details: e.message });
     }
 };
-// const updateTransactions = async (req,res)=>{
-//     try{
-//         const transaciion = await Transaction.findByPk(req.params.id)
-//         if(!transaciion){
-//             return res.status(404).json({status :false , message :"Transaciton not found"})
-//         }
-//         else{
-//             Transaction.update({
 
-//             },{
-//                 where:{id :req.parmas.id}
-//             })
-//         }
-//     }catch(e){
-//         return res.status(500).json({status:false , message:"Some thing Wrong" ,details :e.message})
-
-//     }
-// }
 const deleteTransaction = async (req, res) => {
     try {
         const transaciion = await Transaction.findByPk(req.params.id)
