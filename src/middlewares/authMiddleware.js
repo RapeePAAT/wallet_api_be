@@ -1,7 +1,7 @@
 
 const jwt = require('jsonwebtoken')
 
-const secrectKey = process.env.SECREATE_KEY
+const secrectKey = "c5d5c67a779217b1a883ba15557acc435f0d7f9c80982b95f53584cc87413888"
 const {User} = require('../models/model')
 
 
